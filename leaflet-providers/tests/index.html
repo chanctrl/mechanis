@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Directions Map</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
+    <style>
+        /* Make the map take up the full page */
+        body, html { margin: 0; padding: 0; height: 100%; }
+        #map { width: 100%; height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Leaflet & Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([17.3850, 78.4867], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add the routing control
+        var control = L.Routing.control({
+            waypoints: [
+                L.latLng(17.3850, 78.4867),  // Start
+                L.latLng(17.4260, 78.4875),  // Stop 1
+                L.latLng(17.4500, 78.3900),  // Stop 2
+                L.latLng(17.4750, 78.5000)   // Destination
+            ],
+            routeWhileDragging: true,
+            createMarker: function(i, waypoint, n) {
+                return L.marker(waypoint.latLng).bindPopup(
+                    i === 0 ? "Start Here" : i === n - 1 ? "Destination" : "Stop " + i
+                );
+            },
+            lineOptions: {
+                styles: [{ color: 'red', weight: 6, opacity: 0.7 }]
+            }
+        }).addTo(map);
+
+        // Close popups when clicking outside
+        map.on('click', function() {
+            map.closePopup();
+        });
+    </script>
+
+</body>
+</html>
