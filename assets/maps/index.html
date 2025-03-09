@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map with Directions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <style>
+        #map { height: 80vh; }
+        .controls {
+            margin: 10px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <input type="text" id="places" placeholder="Enter places (comma separated)">
+        <button onclick="calculateRoute()">Get Route</button>
+    </div>
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script>
+        // Initialize the map centered on India
+        let map = L.map('map').setView([20.5937, 78.9629], 5);  // India center
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        let routeControl;
+
+        // Function to get coordinates of a place using OpenStreetMap Nominatim API
+        async function getCoordinates(place) {
+            let url = `https://nominatim.openstreetmap.org/search?format=json&q=${place}`;
+            let response = await fetch(url);
+            let data = await response.json();
+            if (data.length > 0) {
+                return [data[0].lat, data[0].lon];
+            } else {
+                alert("Location not found: " + place);
+                return null;
+            }
+        }
+
+        // Function to calculate the optimal route by calling the Flask backend
+        async function calculateRoute() {
+            let placesInput = document.getElementById("places").value;
+            let placesArray = placesInput.split(",").map(place => place.trim());
+
+            let waypoints = [];
+            for (let place of placesArray) {
+                let coordinates = await getCoordinates(place);
+                if (coordinates) {
+                    waypoints.push(L.latLng(coordinates[0], coordinates[1]));
+                }
+            }
+
+            // Ensure there are valid waypoints
+            if (waypoints.length > 0) {
+                if (routeControl) {
+                    map.removeControl(routeControl);  // Remove existing route control
+                }
+
+                // Display the user-input waypoints on the map
+                routeControl = L.Routing.control({
+                    waypoints: waypoints,
+                    routeWhileDragging: true
+                }).addTo(map);
+
+                // Send the route request to the backend API to get the optimal route info
+                const response = await fetch(`/get_optimal_route?start=${placesArray[0]}`);
+                const data = await response.json();
+                
+                if (data.optimal_route) {
+                    console.log('Optimal Route:', data.optimal_route);
+                    console.log('Total Weighted Distance:', data.total_weighted_distance);
+                    console.log('Actual Total Distance:', data.actual_total_distance);
+                    
+                    // Convert the optimal route into coordinates and display it
+                    let optimalWaypoints = [];
+                    for (let place of data.optimal_route) {
+                        let coordinates = await getCoordinates(place);
+                        if (coordinates) {
+                            optimalWaypoints.push(L.latLng(coordinates[0], coordinates[1]));
+                        }
+                    }
+
+                    // Display the optimal route on the map
+                    if (optimalWaypoints.length > 0) {
+                        L.Routing.control({
+                            waypoints: optimalWaypoints,
+                            routeWhileDragging: true
+                        }).addTo(map);
+                    }
+                } else {
+                    console.error("Error getting route information.");
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
