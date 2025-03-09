@@ -1,8 +1,4 @@
-Thank you for clarifying! Since the backend is part of the `flutter_application_1` directory, I'll update the `README.md` accordingly, reflecting that the backend is within the Flutter project itself.
 
-Here's the updated version of your `README.md`:
-
----
 
 # Mechanis - Patient Management System
 
