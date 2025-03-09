@@ -12,7 +12,7 @@ Mechanis is a comprehensive patient management system developed using **Flutter*
 - **SOS Emergency Alert**: Send an emergency alert for immediate attention.
 - **Login System**: Secure login for patients to access their data.
 - **Optimized Route Generation**: Using Dijkstra’s algorithm and the Travelling Salesman Problem (TSP), the app calculates optimized routes for travel, taking into account critical conditions.
-- **OpenStreetMap Integration**: OpenStreetMap is used to generate maps and calculate the most efficient routes.
+- **OpenStreetMap Integration**: OpenStreetMap generates maps and calculates the most efficient routes.
 
 ## Tech Stack
 
